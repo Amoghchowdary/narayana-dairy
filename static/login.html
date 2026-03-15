@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner Login — Narayana Organic Dairy</title>
+    <!-- Offline vendor assets — downloaded once by SETUP.bat -->
+    <link rel="stylesheet" href="/static/vendor/fonts.css">
+    <link rel="stylesheet" href="/static/vendor/font-awesome.min.css">
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Inter',sans-serif;min-height:100vh;
+             background:linear-gradient(135deg,#022c22 0%,#064e3b 45%,#065f46 75%,#047857 100%);
+             display:flex;align-items:center;justify-content:center;padding:16px;overflow:hidden}
+        .blob{position:fixed;border-radius:50%;filter:blur(90px);opacity:.12;pointer-events:none;z-index:0}
+        .card{background:#fff;border-radius:24px;width:100%;max-width:420px;overflow:hidden;
+              box-shadow:0 30px 70px rgba(0,0,0,.35);position:relative;z-index:1}
+        .hdr{background:linear-gradient(135deg,#064e3b,#10b981);padding:36px 32px 28px;text-align:center;position:relative;overflow:hidden}
+        .hdr::before{content:'';position:absolute;width:140px;height:140px;background:rgba(255,255,255,.06);border-radius:50%;top:-40px;right:-40px}
+        .hdr::after{content:'';position:absolute;width:90px;height:90px;background:rgba(255,255,255,.05);border-radius:50%;bottom:-25px;left:-25px}
+        .cow-ring{width:82px;height:82px;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.22);
+                  border-radius:50%;display:flex;align-items:center;justify-content:center;
+                  margin:0 auto 14px;font-size:38px;position:relative;z-index:1}
+        .body{padding:32px}
+        .step{display:none}
+        .step.active{display:block;animation:fadeUp .32s ease}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        /* Partner pick buttons */
+        .partner-btn{width:100%;padding:16px 20px;margin-bottom:12px;border:2px solid #e5e7eb;
+                     border-radius:14px;background:#f9fafb;cursor:pointer;display:flex;align-items:center;
+                     gap:14px;transition:all .2s;font-family:'Inter',sans-serif;text-align:left}
+        .partner-btn:hover{border-color:#10b981;background:#f0fdf4;transform:translateY(-1px);box-shadow:0 4px 14px rgba(16,185,129,.15)}
+        .partner-btn:active{transform:translateY(0)}
+        .partner-avatar{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#10b981,#059669);
+                        display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;flex-shrink:0}
+        .partner-name{font-weight:700;color:#111827;font-size:16px}
+        .partner-sub{font-size:12px;color:#6b7280;margin-top:2px}
+        /* OTP boxes */
+        .otp-row{display:flex;justify-content:center;gap:8px;margin:22px 0}
+        .otp-box{width:50px;height:58px;border:2px solid #e5e7eb;border-radius:12px;font-size:26px;
+                 font-weight:800;text-align:center;outline:none;color:#064e3b;background:#f9fafb;
+                 transition:.15s;font-family:'Inter',sans-serif;-moz-appearance:textfield}
+        .otp-box::-webkit-outer-spin-button,.otp-box::-webkit-inner-spin-button{-webkit-appearance:none}
+        .otp-box:focus{border-color:#10b981;background:#f0fdf4;box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+        .otp-box.filled{border-color:#10b981;background:#ecfdf5}
+        .otp-sep{align-self:center;color:#d1d5db;font-size:22px}
+        /* Buttons */
+        .btn-green{width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:700;
+                   cursor:pointer;font-family:'Inter',sans-serif;transition:.2s;
+                   background:linear-gradient(135deg,#10b981,#059669);color:#fff;
+                   box-shadow:0 4px 16px rgba(16,185,129,.35)}
+        .btn-green:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(16,185,129,.40)}
+        .btn-green:active{transform:translateY(0)}
+        .btn-green:disabled{opacity:.55;cursor:not-allowed;transform:none}
+        /* Error / dev banners */
+        .err{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:10px 14px;
+             color:#dc2626;font-size:13px;margin-top:12px;display:none}
+        .dev-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 14px;
+                 color:#92400e;font-size:13px;margin-top:12px;display:none;line-height:1.7}
+        .link-btn{background:none;border:none;cursor:pointer;color:#6b7280;font-size:13px;font-family:'Inter',sans-serif}
+        .link-btn:hover{color:#10b981}
+        .divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:#d1d5db;font-size:12px}
+        .divider::before,.divider::after{content:'';flex:1;height:1px;background:#e5e7eb}
+        @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+        .shake{animation:shake .35s ease}
+        @keyframes pop{0%{transform:scale(.4);opacity:0}65%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+        .pop{animation:pop .5s cubic-bezier(.175,.885,.32,1.275) forwards}
+    </style>
+</head>
+<body>
+<div class="blob" style="width:380px;height:380px;background:#10b981;top:-100px;left:-100px"></div>
+<div class="blob" style="width:280px;height:280px;background:#34d399;bottom:-80px;right:-80px"></div>
+<div class="blob" style="width:180px;height:180px;background:#6ee7b7;top:55%;left:65%"></div>
+
+<div class="card">
+    <!-- Header -->
+    <div class="hdr">
+        <div class="cow-ring">🐄</div>
+        <h1 style="font-family:'Outfit',sans-serif;color:#fff;font-size:22px;font-weight:800;position:relative;z-index:1">
+            Narayana Organic Dairy</h1>
+        <p style="color:rgba(255,255,255,.7);font-size:13px;margin-top:5px;position:relative;z-index:1">
+            Partner Access Portal</p>
+    </div>
+
+    <div class="body">
+
+        <!-- STEP 1: Who are you? -->
+        <div class="step active" id="step-pick">
+            <div style="text-align:center;margin-bottom:24px">
+                <div style="width:50px;height:50px;background:#f0fdf4;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px">
+                    <i class="fa-solid fa-users" style="color:#10b981;font-size:20px"></i></div>
+                <h2 style="font-family:'Outfit',sans-serif;font-size:20px;color:#111827;font-weight:800">Who are you?</h2>
+                <p style="color:#6b7280;font-size:13px;margin-top:5px">Select your name to receive an OTP</p>
+            </div>
+            <div id="partner-buttons">
+                <!-- Filled dynamically -->
+                <div style="text-align:center;color:#9ca3af;font-size:13px;padding:16px">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Loading partners...
+                </div>
+            </div>
+            <div class="err" id="pick-err"></div>
+            <p style="text-align:center;color:#9ca3af;font-size:12px;margin-top:16px">
+                <i class="fa-solid fa-lock" style="margin-right:4px"></i>OTP will be sent to the farm's shared email
+            </p>
+        </div>
+
+        <!-- STEP 2: Enter OTP -->
+        <div class="step" id="step-otp">
+            <div style="text-align:center;margin-bottom:20px">
+                <div style="width:50px;height:50px;background:#f0fdf4;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px">
+                    <i class="fa-solid fa-shield-halved" style="color:#10b981;font-size:20px"></i></div>
+                <h2 style="font-family:'Outfit',sans-serif;font-size:20px;color:#111827;font-weight:800">Enter OTP</h2>
+                <p style="color:#6b7280;font-size:13px;margin-top:5px">
+                    Hello <strong id="otp-partner-name" style="color:#10b981"></strong>! Check <strong>narayanaorganicdairy@gmail.com</strong> for your OTP.
+                </p>
+            </div>
+
+            <!-- Dev mode banner -->
+            <div class="dev-box" id="dev-box">
+                <i class="fa-solid fa-flask" style="margin-right:6px"></i>
+                <strong>Dev Mode</strong> — OTP delivered on screen:<br>
+                <span id="dev-otp" style="font-size:26px;font-weight:900;letter-spacing:8px;color:#064e3b;display:block;text-align:center;margin-top:6px"></span>
+            </div>
+
+            <!-- 6 OTP input boxes -->
+            <div class="otp-row">
+                <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" id="o0">
+                <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" id="o1">
+                <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" id="o2">
+                <span class="otp-sep">—</span>
+                <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" id="o3">
+                <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" id="o4">
+                <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" id="o5">
+            </div>
+
+            <button class="btn-green" id="verify-btn" onclick="handleVerifyOTP()">
+                <i class="fa-solid fa-circle-check" style="margin-right:8px"></i>Verify & Login
+            </button>
+            <div class="err" id="otp-err"></div>
+
+            <div class="divider">or</div>
+            <div style="display:flex;justify-content:center;gap:20px">
+                <button class="link-btn" onclick="resendOTP()">
+                    <i class="fa-solid fa-rotate-right" style="margin-right:4px"></i>Resend OTP
+                </button>
+                <button class="link-btn" onclick="goBack()">
+                    <i class="fa-solid fa-arrow-left" style="margin-right:4px"></i>Go Back
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 3: Success -->
+        <div class="step" id="step-success">
+            <div style="text-align:center;padding:12px 0 8px">
+                <div class="pop" style="font-size:64px;margin-bottom:16px">✅</div>
+                <h2 style="font-family:'Outfit',sans-serif;font-size:22px;color:#064e3b;font-weight:800">Login Successful!</h2>
+                <p style="color:#6b7280;font-size:14px;margin-top:8px">Welcome, <strong id="welcome-name" style="color:#10b981"></strong>!</p>
+                <p style="color:#9ca3af;font-size:13px;margin-top:6px">Redirecting to dashboard...</p>
+                <div style="margin-top:20px;height:4px;background:#e5e7eb;border-radius:4px;overflow:hidden">
+                    <div id="redirect-bar" style="height:100%;background:linear-gradient(90deg,#10b981,#059669);width:0%;transition:width 2s linear;border-radius:4px"></div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /body -->
+</div><!-- /card -->
+
+<script>
+const BASE    = window.location.origin;
+const OTP_IDS = ['o0','o1','o2','o3','o4','o5'];
+let selectedPartner = '';
+
+// Avatar icons per partner index
+const ICONS = ['fa-user-tie','fa-user'];
+const COLORS = ['linear-gradient(135deg,#10b981,#059669)','linear-gradient(135deg,#6366f1,#4f46e5)'];
+
+// Wire OTP keyboard navigation
+OTP_IDS.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', e => {
+        const v = e.target.value.replace(/\D/g,'');
+        e.target.value = v;
+        if (v) { el.classList.add('filled'); if (i<5) document.getElementById(OTP_IDS[i+1]).focus(); }
+        else el.classList.remove('filled');
+    });
+    el.addEventListener('keydown', e => {
+        if (e.key==='Backspace' && !el.value && i>0) {
+            const p = document.getElementById(OTP_IDS[i-1]);
+            p.focus(); p.value=''; p.classList.remove('filled');
+        }
+        if (e.key==='Enter') handleVerifyOTP();
+    });
+    el.addEventListener('paste', e => {
+        e.preventDefault();
+        const d = (e.clipboardData.getData('text').replace(/\D/g,'')).slice(0,6);
+        d.split('').forEach((c,j)=>{ const b=document.getElementById(OTP_IDS[j]); if(b){b.value=c;b.classList.add('filled');} });
+        const nxt = document.getElementById(OTP_IDS[Math.min(d.length,5)]);
+        if(nxt) nxt.focus();
+    });
+});
+
+function getOTPValue() { return OTP_IDS.map(id=>document.getElementById(id).value).join(''); }
+function clearOTPBoxes() { OTP_IDS.forEach(id=>{const b=document.getElementById(id);b.value='';b.classList.remove('filled');}); }
+
+function showErr(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg; el.style.display = 'block';
+    el.classList.add('shake'); setTimeout(()=>el.classList.remove('shake'),400);
+}
+function hideErr(id) { document.getElementById(id).style.display='none'; }
+function showStep(name) {
+    document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+    document.getElementById('step-'+name).classList.add('active');
+}
+
+// Load partner names from server
+async function loadPartners() {
+    try {
+        const res  = await fetch(BASE + '/api/auth/partners');
+        const data = await res.json();
+        renderPartnerButtons(data.partners || []);
+    } catch {
+        document.getElementById('partner-buttons').innerHTML =
+            '<p style="color:#ef4444;text-align:center;font-size:13px">Could not load partners. Is the server running?</p>';
+    }
+}
+
+function renderPartnerButtons(names) {
+    const container = document.getElementById('partner-buttons');
+    if (!names.length) {
+        container.innerHTML = '<p style="color:#9ca3af;text-align:center;font-size:13px">No partners configured in partners.json</p>';
+        return;
+    }
+    container.innerHTML = names.map((name, i) => `
+        <button class="partner-btn" onclick="handleSelectPartner('${name.replace(/'/g,"\\'")}')">
+            <div class="partner-avatar" style="background:${COLORS[i] || COLORS[0]}">
+                <i class="fa-solid ${ICONS[i] || ICONS[0]}"></i>
+            </div>
+            <div>
+                <div class="partner-name">${name}</div>
+                <div class="partner-sub">Click to receive OTP</div>
+            </div>
+            <i class="fa-solid fa-arrow-right" style="margin-left:auto;color:#d1d5db"></i>
+        </button>`).join('');
+}
+
+async function handleSelectPartner(name) {
+    selectedPartner = name;
+    hideErr('pick-err');
+    // Disable all buttons while sending
+    document.querySelectorAll('.partner-btn').forEach(b => { b.disabled=true; b.style.opacity='.6'; });
+
+    try {
+        const res  = await fetch(BASE + '/api/auth/send-otp', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({name})
+        });
+        const data = await res.json();
+        if (!res.ok) { showErr('pick-err', data.detail || 'Failed to send OTP.'); return; }
+
+        // Show OTP step
+        document.getElementById('otp-partner-name').textContent = name;
+        if (data.status === 'dev' && data.dev_otp) {
+            const devBox = document.getElementById('dev-box');
+            document.getElementById('dev-otp').textContent = data.dev_otp;
+            devBox.style.display = 'block';
+            // Auto-fill in dev mode
+            data.dev_otp.toString().split('').forEach((c,i)=>{
+                const b=document.getElementById(OTP_IDS[i]); if(b){b.value=c;b.classList.add('filled');}
+            });
+        } else {
+            document.getElementById('dev-box').style.display='none';
+        }
+        showStep('otp');
+        document.getElementById('o0').focus();
+    } catch {
+        showErr('pick-err','Network error. Is the server running?');
+    } finally {
+        document.querySelectorAll('.partner-btn').forEach(b => { b.disabled=false; b.style.opacity='1'; });
+    }
+}
+
+async function handleVerifyOTP() {
+    const otp = getOTPValue();
+    if (otp.length < 6) { showErr('otp-err','Please enter all 6 digits.'); return; }
+    hideErr('otp-err');
+    const btn = document.getElementById('verify-btn');
+    btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin" style="margin-right:8px"></i>Verifying...';
+
+    try {
+        const res  = await fetch(BASE + '/api/auth/verify-otp', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({name: selectedPartner, otp})
+        });
+        const data = await res.json();
+        if (!res.ok) { showErr('otp-err', data.detail || 'Verification failed.'); return; }
+
+        localStorage.setItem('farm_token', data.access_token);
+        localStorage.setItem('farm_user', JSON.stringify({name: data.partner_name, email: data.partner_email || ''}));
+        document.getElementById('welcome-name').textContent = data.partner_name;
+        showStep('success');
+        setTimeout(()=>{ document.getElementById('redirect-bar').style.width='100%'; }, 50);
+        setTimeout(()=>{ window.location.href='/'; }, 2200);
+    } catch {
+        showErr('otp-err','Network error. Is the server running?');
+    } finally {
+        btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-circle-check" style="margin-right:8px"></i>Verify & Login';
+    }
+}
+
+async function resendOTP() {
+    clearOTPBoxes(); hideErr('otp-err');
+    document.getElementById('dev-box').style.display='none';
+    await handleSelectPartner(selectedPartner);
+}
+function goBack() {
+    clearOTPBoxes(); hideErr('otp-err');
+    document.getElementById('dev-box').style.display='none';
+    showStep('pick');
+}
+
+// Redirect if already logged in
+if (localStorage.getItem('farm_token')) { window.location.href='/'; }
+else { loadPartners(); }
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+    "partners": [
+        {
+            "name": "upender rao",
+            "email": "sirikondaviinod99@gmail.com"
+        },
+        {
+            "name": "naresh",
+            "email": "narayanaorganicdairy@gmail.com"
+        }
+    ],
+    "otp_delivery_email": "narayanaorganicdairy@gmail.com",
+    "smtp": {
+        "host": "smtp.gmail.com",
+        "port": 465,
+        "username": "narayanaorganicdairy@gmail.com",
+        "password": "bwjs ykje fpod hhlp",
+        "from_email": "narayanaorganicdairy@gmail.com"
+    }
+}

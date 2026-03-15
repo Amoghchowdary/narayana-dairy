@@ -1,0 +1,98 @@
+name: Build Windows EXE
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Prepare Static Files
+        shell: cmd
+        run: |
+          if not exist static mkdir static
+          if not exist static\vendor mkdir static\vendor
+          if not exist static\vendor\webfonts mkdir static\vendor\webfonts
+          if not exist static\vendor\fonts mkdir static\vendor\fonts
+          if exist index.html    copy /Y index.html    static\index.html
+          if exist login.html    copy /Y login.html    static\login.html
+          if exist styles.css    copy /Y styles.css    static\styles.css
+          if exist app.js        copy /Y app.js        static\app.js
+          if exist sw.js         copy /Y sw.js         static\sw.js
+          if exist manifest.json copy /Y manifest.json static\manifest.json
+
+      - name: Download Offline Vendor Assets
+        run: python scripts/download_vendor.py
+
+      - name: Init DB Placeholder
+        run: |
+          python -c "
+          import os
+          if not os.path.exists('farm.db'):
+              open('farm.db', 'w').close()
+              print('Created empty farm.db placeholder')
+          else:
+              print('farm.db already exists')
+          "
+
+      - name: Build EXE with PyInstaller
+        run: |
+          pyinstaller narayana.spec --clean --noconfirm
+
+      - name: Zip Distribution
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}"
+          if (-not $version) { $version = "latest" }
+          $zipName = "NarayanaDairy-Windows-$version.zip"
+          Compress-Archive -Path "dist\NarayanaDairy\*" -DestinationPath $zipName
+          Write-Host "Created: $zipName"
+          echo "ZIP_NAME=$zipName" >> $env:GITHUB_ENV
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ env.ZIP_NAME }}
+          generate_release_notes: true
+          name: "Narayana Dairy ${{ github.ref_name }}"
+          body: |
+            ## Narayana Organic Dairy — ${{ github.ref_name }}
+
+            ### Download & Run (Windows) — No Python needed
+
+            1. Download `${{ env.ZIP_NAME }}` below
+            2. Extract the zip anywhere on your PC
+            3. Double-click `NarayanaDairy.exe`
+            4. Browser opens automatically — works fully OFFLINE
+
+            ### Data Files (keep these safe)
+            - `farm.db` — all your farm data (back this up regularly)
+            - `partners.json` — partner login credentials
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NarayanaDairy-Windows
+          path: ${{ env.ZIP_NAME }}
+          retention-days: 30
