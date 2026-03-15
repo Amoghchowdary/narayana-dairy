@@ -1,15 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
 # PyInstaller spec for Narayana Organic Dairy
-# Builds a single-folder distribution with the FastAPI server bundled
+# Compatible with PyInstaller 6.x
 
-import os
-from PyInstaller.utils.hooks import collect_data_files, collect_submodules
-
-block_cipher = None
-
-# Collect all data files needed
+# Data files to bundle
 added_files = [
-    ('static', 'static'),          # includes static/vendor/ offline assets
+    ('static', 'static'),
     ('partners.json', '.'),
     ('farm.db', '.'),
 ]
@@ -68,13 +63,10 @@ a = Analysis(
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=block_cipher,
     noarchive=False,
 )
 
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+pyz = PYZ(a.pure)
 
 exe = EXE(
     pyz,
@@ -86,7 +78,7 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=True,   # Keep True so you can see logs/errors
+    console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
