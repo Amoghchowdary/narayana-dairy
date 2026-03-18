@@ -6,6 +6,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-windows:
     runs-on: windows-latest
@@ -48,24 +51,33 @@ jobs:
           import os
           if not os.path.exists('farm.db'):
               open('farm.db', 'w').close()
-              print('Created empty farm.db placeholder')
+              print('Created empty farm.db')
           else:
-              print('farm.db already exists')
+              print('farm.db exists')
           "
 
       - name: Build EXE with PyInstaller
+        run: pyinstaller narayana.spec --clean --noconfirm
+
+      - name: Verify EXE was built
+        shell: cmd
         run: |
-          pyinstaller narayana.spec --clean --noconfirm
+          if exist dist\NarayanaDairy\NarayanaDairy.exe (
+            echo EXE built successfully
+          ) else (
+            echo ERROR: EXE not found
+            exit /b 1
+          )
 
       - name: Zip Distribution
         shell: pwsh
         run: |
           $version = "${{ github.ref_name }}"
-          if (-not $version) { $version = "latest" }
+          if (-not $version -or $version -eq "") { $version = "latest" }
           $zipName = "NarayanaDairy-Windows-$version.zip"
           Compress-Archive -Path "dist\NarayanaDairy\*" -DestinationPath $zipName
           Write-Host "Created: $zipName"
-          echo "ZIP_NAME=$zipName" >> $env:GITHUB_ENV
+          echo "ZIP_NAME=$zipName" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
@@ -78,15 +90,14 @@ jobs:
             ## Narayana Organic Dairy — ${{ github.ref_name }}
 
             ### Download & Run (Windows) — No Python needed
+            1. Download the zip below
+            2. Extract anywhere on your PC
+            3. Double-click NarayanaDairy.exe
+            4. Browser opens automatically
 
-            1. Download `${{ env.ZIP_NAME }}` below
-            2. Extract the zip anywhere on your PC
-            3. Double-click `NarayanaDairy.exe`
-            4. Browser opens automatically — works fully OFFLINE
-
-            ### Data Files (keep these safe)
-            - `farm.db` — all your farm data (back this up regularly)
-            - `partners.json` — partner login credentials
+            ### Keep these files safe
+            - farm.db — all your farm data
+            - partners.json — login credentials
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
