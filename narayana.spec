@@ -1,56 +1,41 @@
 # -*- mode: python ; coding: utf-8 -*-
-# PyInstaller spec for Narayana Organic Dairy
+# PyInstaller spec — Narayana Organic Dairy v1.0.4
 # Compatible with PyInstaller 6.x
 
-# Data files to bundle
 added_files = [
-    ('static', 'static'),
+    ('static',        'static'),
     ('partners.json', '.'),
-    ('farm.db', '.'),
+    ('farm.db',       '.'),
 ]
 
-# Hidden imports for FastAPI / Uvicorn / SQLAlchemy
 hidden_imports = [
-    'uvicorn',
-    'uvicorn.main',
-    'uvicorn.config',
-    'uvicorn.lifespan',
-    'uvicorn.lifespan.off',
-    'uvicorn.lifespan.on',
-    'uvicorn.loops',
-    'uvicorn.loops.auto',
-    'uvicorn.loops.asyncio',
-    'uvicorn.protocols',
-    'uvicorn.protocols.http',
-    'uvicorn.protocols.http.auto',
+    # Uvicorn
+    'uvicorn', 'uvicorn.main', 'uvicorn.config',
+    'uvicorn.lifespan', 'uvicorn.lifespan.off', 'uvicorn.lifespan.on',
+    'uvicorn.loops', 'uvicorn.loops.auto', 'uvicorn.loops.asyncio',
+    'uvicorn.protocols', 'uvicorn.protocols.http', 'uvicorn.protocols.http.auto',
     'uvicorn.protocols.http.h11_impl',
-    'uvicorn.protocols.websockets',
-    'uvicorn.protocols.websockets.auto',
-    'uvicorn.protocols.websockets.websockets_impl',
-    'uvicorn.logging',
-    'fastapi',
-    'sqlalchemy',
-    'sqlalchemy.dialects.sqlite',
-    'sqlalchemy.orm',
-    'pydantic',
-    'email.mime.text',
-    'email.mime.multipart',
-    'smtplib',
-    'openpyxl',
-    'jwt',
-    'passlib',
-    'passlib.handlers',
-    'passlib.handlers.bcrypt',
-    'multipart',
-    'anyio',
-    'anyio._backends._asyncio',
-    'starlette',
-    'starlette.routing',
-    'starlette.staticfiles',
-    'starlette.responses',
-    'starlette.middleware',
-    'starlette.middleware.cors',
-    'h11',
+    'uvicorn.protocols.websockets', 'uvicorn.protocols.websockets.auto',
+    'uvicorn.protocols.websockets.websockets_impl', 'uvicorn.logging',
+    # FastAPI / Starlette
+    'fastapi', 'fastapi.routing', 'fastapi.middleware', 'fastapi.middleware.cors',
+    'starlette', 'starlette.routing', 'starlette.staticfiles',
+    'starlette.responses', 'starlette.middleware', 'starlette.middleware.cors',
+    'starlette.background', 'starlette.concurrency', 'starlette.datastructures',
+    # SQLAlchemy
+    'sqlalchemy', 'sqlalchemy.dialects.sqlite', 'sqlalchemy.orm',
+    'sqlalchemy.ext.declarative',
+    # Pydantic
+    'pydantic', 'pydantic.deprecated.class_validators',
+    # Auth / Email
+    'jwt', 'passlib', 'passlib.handlers', 'passlib.handlers.bcrypt',
+    'email.mime.text', 'email.mime.multipart', 'smtplib',
+    # Other
+    'openpyxl', 'multipart', 'python_multipart',
+    'anyio', 'anyio._backends._asyncio', 'anyio._backends._thread',
+    'h11', 'httptools', 'watchfiles', 'websockets',
+    # App modules — explicitly listed so PyInstaller bundles them
+    'main', 'models', 'schemas', 'auth', 'database',
 ]
 
 a = Analysis(
@@ -62,7 +47,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['tkinter', 'test', 'unittest'],
     noarchive=False,
 )
 
