@@ -947,3 +947,57 @@ def get_monthly_summary(month: str = None, db: Session = Depends(get_db)):
         "net_profit": round(income - expenses, 2),
         "unpaid_vendors": unpaid_vendors,
     }
+
+
+# ─── Mobile Sync Endpoints ────────────────────────────────────────────────────
+
+class SyncPayload(BaseModel):
+    buffaloes:       list = []
+    milk_production: list = []
+    milk_sales:      list = []
+    expenses:        list = []
+    health_records:  list = []
+    vendors:         list = []
+    vendor_payments: list = []
+
+@app.get("/api/sync/push")
+def sync_push(since: str = "2000-01-01T00:00:00", db: Session = Depends(get_db)):
+    """Return all records changed after `since` (for phone to pull)."""
+    return {
+        "buffaloes":       [r.__dict__ for r in db.query(models.Buffalo).filter(models.Buffalo.created_at > since).all()],
+        "milk_production": [r.__dict__ for r in db.query(models.MilkProduction).filter(models.MilkProduction.created_at > since).all()],
+        "milk_sales":      [r.__dict__ for r in db.query(models.MilkSales).filter(models.MilkSales.created_at > since).all()],
+        "expenses":        [r.__dict__ for r in db.query(models.Expense).filter(models.Expense.created_at > since).all()],
+        "health_records":  [r.__dict__ for r in db.query(models.HealthRecord).filter(models.HealthRecord.created_at > since).all()],
+        "vendors":         [r.__dict__ for r in db.query(models.Vendor).filter(models.Vendor.created_at > since).all()],
+        "vendor_payments": [r.__dict__ for r in db.query(models.VendorPayment).filter(models.VendorPayment.created_at > since).all()],
+        "since": since,
+    }
+
+@app.post("/api/sync/receive")
+def sync_receive(payload: SyncPayload, db: Session = Depends(get_db)):
+    """Receive records from phone and merge into PC database (upsert by id)."""
+    from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+    counts = {}
+
+    def upsert(model_cls, items):
+        count = 0
+        for item in items:
+            item.pop("_sa_instance_state", None)
+            # Check if record exists
+            existing = db.query(model_cls).filter(model_cls.id == item.get("id")).first()
+            if existing is None:
+                db.add(model_cls(**item))
+                count += 1
+        db.commit()
+        return count
+
+    counts["buffaloes"]       = upsert(models.Buffalo,       payload.buffaloes)
+    counts["milk_production"] = upsert(models.MilkProduction, payload.milk_production)
+    counts["milk_sales"]      = upsert(models.MilkSales,      payload.milk_sales)
+    counts["expenses"]        = upsert(models.Expense,        payload.expenses)
+    counts["health_records"]  = upsert(models.HealthRecord,   payload.health_records)
+    counts["vendors"]         = upsert(models.Vendor,         payload.vendors)
+    counts["vendor_payments"] = upsert(models.VendorPayment,  payload.vendor_payments)
+
+    return {"status": "ok", "merged": counts}
